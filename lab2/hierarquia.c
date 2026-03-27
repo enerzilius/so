@@ -15,16 +15,16 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  pid_t root_pid = getpid();
+  // pid_t root_pid = getpid();
 
   for(int i = 0; i < n; ++i) {
     pid_t pid = fork();
     if(pid < 0) exit(0);
   }
 
-  char pid_str[16];
-  execl("/bin/pstree", "pstree", "-c", "-T", pid_str, NULL);
-  printf("\n\n");
+  // char pid_str[16];
+  // system("pstree -c -T", pid_str, NULL);
+  // printf("\n\n");
 
   wait(NULL);
   exit(0);
