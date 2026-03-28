@@ -9,19 +9,19 @@ void genRandomVec(int** vec, int n) {
   *vec = malloc(n * sizeof(int));
   srand(time(NULL));
 
-  for(int i = 0; i < n; ++i) (*vec)[i] = rand()%n;
+  for(int i = 0; i < n; ++i) (*vec)[i] = rand();
 }
 
 int main(int argc, char* argv[]) {
   int* vec;
-  int n = 10;
+  int n = 20;
 
   genRandomVec(&vec, n);
 
   for(int i = 0; i < n; ++i) printf("%d ", vec[i]);
   printf("\n");
 
-  int target = vec[rand()%n-1];
+  int target = vec[rand()%n];
   printf("Elemento a ser encontrado: %d\n", target);
   
   int children = 3;
@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
     if(pid == 0) {
       if(i == children-1) workload += n%children;
       for(int j = 0; j < workload; ++j) {
-        if(vec[j+i*workload]) { 
-          printf("Processo %d encontrou %d", getpid(), target);
+        if(vec[j+i*workload] == target) { 
+          printf("Processo %d encontrou %d\n", getpid(), target);
           exit(0);
         }
       }
@@ -51,10 +51,10 @@ int main(int argc, char* argv[]) {
 
   for(int i = 0; i < children; ++i) {
     int status;
-    pid_t pid = wait(&status);
+    wait(&status);
     if(status != 1) exit(0);
   }
 
-  printf("Elemento não encontrado :(");
+  printf("Elemento [%d] não encontrado :(", target);
   exit(0);
 }
