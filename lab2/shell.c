@@ -21,7 +21,6 @@ void mainLoop() {
   while(1) {
     printf(">> ");
     fgets(command, sizeof(command), stdin);
-    printf("\n");
     command[strcspn(command, "\n")] = 0;
     
     int argc = countWords(command);
@@ -47,10 +46,12 @@ void mainLoop() {
       exit(0);
     }
 
-    if(lastArg[0] != '&') {
-      int status;    
-      wait(&status);
+    if(lastArg[0] == '&') {
+      continue;
     }
+
+    int status;   
+    wait(&status);
   }
 }
 
