@@ -12,7 +12,7 @@ void genRandomVec(int** vec, int n) {
   for(int i = 0; i < n; ++i) (*vec)[i] = rand();
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
   int* vec;
   int n = 20;
 

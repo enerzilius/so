@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string.h>
 
 int main(int argc, char** argv) {
   if(argc < 2) {
@@ -24,9 +25,8 @@ int main(int argc, char** argv) {
     exit(0);
   }
   if(pid == 0) {
-    char src[20];                          
-    sprintf(src, "/bin/%s", arguments[0]); 
-    printf("%s\n", src);
+    char src[20] = "/bin/";
+    strcat(src, arguments[0]);
     execv(src, arguments);
     exit(0);
   }
