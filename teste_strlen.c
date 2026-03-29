@@ -7,9 +7,9 @@ int main() {
     char *string;
     char *tofree;
 
-    tofree = string = strdup("maçã,banana,,laranja"); // Duplica para permitir modificação
+    tofree = string = strdup("maçã banana  laranja"); // Duplica para permitir modificação
 
-    while ((token = strsep(&string, ",")) != NULL) {
+    while ((token = strsep(&string, " ")) != NULL) {
         printf("Token: '%s'\n", token);
     }
 
