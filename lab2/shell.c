@@ -5,10 +5,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-void execCommand(char* command) {
-  
-}
-
 int countWords(char* str) {
   int c = 1;
   for(int i = 0; i<strlen(str); i++) if(str[i] == ' ') c++;
