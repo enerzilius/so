@@ -32,12 +32,12 @@ int main(int argc, char* argv[]) {
     if(pid < 0) exit(0);
 
     if(pid == 0) {
+      //sleep(1);
       continue;
     }
 
     if(pid > 0) {
       showPsTree(og_pid);
-      //if(i == n-1) showPsTree();
       exit(0);
     };
   }
