@@ -1,13 +1,17 @@
 CC=gcc -Wall
 
+EX0 = forkbomb
 EX1 = hierarquia
 EX2 = exec
 EX3 = busca_vetor
 EX4 = shell
 
-PROGS = $(EX1) $(EX2) $(EX3) $(EX4)
+PROGS = $(EX0) $(EX1) $(EX2) $(EX3) $(EX4)
 
 all: $(PROGS)
+
+$(EX0): $(EX0).c
+	$(CC) $(EX0).c -o $(EX0).out
 
 $(EX1): $(EX1).c
 	$(CC) $(EX1).c -o $(EX1).out

@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
 
-  pid_t og_pid = getpid();
+  //pid_t og_pid = getpid();
 
   if(layers==1) showPsTree(); // como 1 não entra no for, já faz o pstree aqui
   

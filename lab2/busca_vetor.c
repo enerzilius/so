@@ -24,8 +24,15 @@ void genRandomVec(int** vec, int n) {
 
 int main(int argc, char** argv) {
   int* vec;
-  int n = 20;
-
+  if(argc < 3) { 
+    printf("Argumentos faltando!");
+    exit(0);
+  }
+  int n = atoi(argv[1]);
+  if(n < 1) {
+    printf("O número de elementos não pode ser menor que 1");
+    exit(0);
+  }
   genRandomVec(&vec, n);
 
   // imprime o vetor e o número alvo
@@ -37,8 +44,14 @@ int main(int argc, char** argv) {
   
   // numero de filhos responsaveis, cada um recebe
   // uma parcela do trabalho
-  int children = 3;
+  int children = atoi(argv[2]);
+  if(children < 1) {                                                 
+    printf("O número de filhos não pode ser menor que 1"); 
+    exit(0);                                                  
+  }                                                           
+
   int workload = n/children;
+  if(workload < 1) workload = 1;
 
   for (int i = 0; i < children; ++i) {
     pid_t pid = fork();
@@ -50,8 +63,10 @@ int main(int argc, char** argv) {
     
     // inicia a busca se o processo for filho
     if(pid == 0) {
+      // Se tiver mais filhos que elementos, pula os que não precisam trabalhar
       // se for o último processo, recebe o resto do trabalho que sobrou além
       // da sua cota
+      if(i >= n) continue;
       if(i == children-1) workload += n%children;
       for(int j = 0; j < workload; ++j) {
         // acessa a sua porção do vetor
