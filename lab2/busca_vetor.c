@@ -5,6 +5,16 @@
 #include <sys/wait.h>
 #include <time.h>
 
+/*                                                                             
+ * Autor: Eber Felipe Barrotti Louback                                         
+ * Descrição: Busca um número em um vetor de tamanho n usando um número
+ * determinado de filhos
+ * Data de criação: 28/03/2026                                                 
+ * Data de modificação: 30/03/2026                                             
+*/                                                                             
+
+// Recebe um ponteiron de vetor de inteiros, aloca n inteiros
+// e prenche o vetor com números aleatórios
 void genRandomVec(int** vec, int n) {
   *vec = malloc(n * sizeof(int));
   srand(time(NULL));
@@ -18,12 +28,15 @@ int main(int argc, char** argv) {
 
   genRandomVec(&vec, n);
 
+  // imprime o vetor e o número alvo
   for(int i = 0; i < n; ++i) printf("%d ", vec[i]);
   printf("\n");
 
   int target = vec[rand()%n];
   printf("Elemento a ser encontrado: %d\n", target);
   
+  // numero de filhos responsaveis, cada um recebe
+  // uma parcela do trabalho
   int children = 3;
   int workload = n/children;
 
@@ -34,10 +47,14 @@ int main(int argc, char** argv) {
       printf("Erro no fork\n");
       exit(0);
     }
-
+    
+    // inicia a busca se o processo for filho
     if(pid == 0) {
+      // se for o último processo, recebe o resto do trabalho que sobrou além
+      // da sua cota
       if(i == children-1) workload += n%children;
       for(int j = 0; j < workload; ++j) {
+        // acessa a sua porção do vetor
         if(vec[j+i*workload] == target) { 
           printf("Processo %d encontrou %d\n", getpid(), target);
           exit(0);
@@ -49,6 +66,8 @@ int main(int argc, char** argv) {
 
   free(vec);
 
+  // espera o resultado e se não receber um status 0 
+  // (sucesso), imprime que não encontrou o  número desejado
   for(int i = 0; i < children; ++i) {
     int status;
     wait(&status);
