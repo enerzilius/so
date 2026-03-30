@@ -41,5 +41,11 @@ $ ./busca_vetor.out 15 5
 1605424241 1650560312 1557003612 981488601 1919060598 1854308327 1721319865 37229818 1407479294 1117422544 1096310109 1150086374 23209194 99630586 1221653730
 Elemento a ser encontrado: 1919060598
 Processo 122454 encontrou 1919060598
+
+$ ./exec.out ls
+ busca_vetor.c                         exec.c       forkbomb.out    'Laboratorio 02 - processos.pdf'   shell.c
+ busca_vetor.out                       exec.out     hierarquia.c     Makefile                          shell.out
+ comandos_linux-sistema_processo.txt   forkbomb.c   hierarquia.out   README.md
+Processo 126783 foi finalizado com estado 0.
 ```
 
