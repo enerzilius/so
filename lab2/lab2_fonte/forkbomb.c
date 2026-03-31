@@ -12,7 +12,7 @@
 
 
 void recursiveForks() {
-  pid_t pid = fork();
+  fork();
   recursiveForks();
 }
 

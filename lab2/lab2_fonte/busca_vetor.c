@@ -19,7 +19,7 @@ void genRandomVec(int** vec, int n) {
   *vec = malloc(n * sizeof(int));
   srand(time(NULL));
 
-  for(int i = 0; i < n; ++i) (*vec)[i] = rand();
+  for(int i = 0; i < n; ++i) (*vec)[i] = rand()%n;
 }
 
 int main(int argc, char** argv) {
