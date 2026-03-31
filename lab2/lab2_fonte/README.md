@@ -10,7 +10,10 @@ $ make
 # Como executar
 
 ```bash
-$ ./<programa>.out
+$ ./hierarquia.out <Número de camadas>
+$ ./exec.out <comando desejado>
+$ ./busca_vetor.out <numero de elementos do vetor> <numero de filhos>
+$ ./shell.out
 ```
 
 # Bibliotecas usadas
@@ -37,10 +40,11 @@ gcc -Wall exec.c -o exec.out
 gcc -Wall busca_vetor.c -o busca_vetor.out
 gcc -Wall shell.c -o shell.out
 
-$ ./busca_vetor.out 15 5
-1605424241 1650560312 1557003612 981488601 1919060598 1854308327 1721319865 37229818 1407479294 1117422544 1096310109 1150086374 23209194 99630586 1221653730
-Elemento a ser encontrado: 1919060598
-Processo 122454 encontrou 1919060598
+$ busca_vetor.out 10 2
+1 3 9 8 4 0 6 4 0 1
+Elemento a ser encontrado: 4
+Processo 22336 encontrou 4
+Processo 22337 encontrou 4
 
 $ ./exec.out ls
  busca_vetor.c                         exec.c       forkbomb.out    'Laboratorio 02 - processos.pdf'   shell.c
