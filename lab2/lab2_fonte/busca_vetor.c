@@ -68,13 +68,15 @@ int main(int argc, char** argv) {
       // da sua cota
       if(i >= n) continue;
       if(i == children-1) workload += n%children;
+      int found = 0;
       for(int j = 0; j < workload; ++j) {
         // acessa a sua porção do vetor
         if(vec[j+i*workload] == target) { 
-          printf("Processo %d encontrou %d\n", getpid(), target);
-          exit(0);
+          printf("Processo %d encontrou %d na posição %d.\n", getpid(), target, (j+i*workload));
+          found = 1;
         }
       }
+      if(found) exit(0);
       exit(1);
     }
   }
