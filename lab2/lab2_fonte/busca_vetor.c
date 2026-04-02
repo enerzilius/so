@@ -88,9 +88,9 @@ int main(int argc, char** argv) {
   for(int i = 0; i < children; ++i) {
     int status;
     wait(&status);
-    if(status != 1) exit(0);
+    if(status < 1) exit(0);
   }
 
-  printf("Elemento [%d] não encontrado :(", target);
+  printf("Elemento [%d] não encontrado :(\n", target);
   exit(0);
 }
