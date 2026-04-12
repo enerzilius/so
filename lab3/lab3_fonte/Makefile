@@ -1,6 +1,6 @@
 .PHONY:  matriz
 
-CC=gcc -Wall
+CC=gcc
 
 EX0 = busca
 EX1 = processar_matriz
@@ -13,7 +13,7 @@ $(EX0): $(EX0).c
 	$(CC) $(EX0).c -o $(EX0).out
 
 $(EX1): $(EX1).c $(M).c
-	$(CC) $(EX1).c $(M).c -o $(EX1).out
+	$(CC) $(EX1).c $(M).c -o $(EX1).out -lm
 
 clean:
 	rm -rf *.out *.o
