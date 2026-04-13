@@ -48,8 +48,6 @@ int main(int argc, char* argv[]) {
   int linhas = 6;
   int colunas = 8; 
   int **matriz = read_matrix_from_file("matriz_6por8.in", &linhas, &colunas);
-  printf("%d %d\n", linhas, colunas); 
-  print_matrix(matriz, linhas, colunas);
 
   // divisão do trabalho, metade das threads faz a media aritmetica e a outra faz a geométrica
   // define o ínicio (linha/coluna) da thread e quantas ela vai percorrer
@@ -95,12 +93,25 @@ int main(int argc, char* argv[]) {
 
   // cria as threads, ajustando caso só crie uma
   pthread_t threads[quantidadeThreads];
-  printf("work: %d\n", dados[0].workload);
 
   // threads de MA
   for(int i = 0; i < metadeThreads; i++) pthread_create(&threads[i], NULL, mediaAritmetica, &dados[i]);
   int comecoGeometrica = metadeThreads;
   
+  // recupereando os valores vindo das threads
+  // cria o vetor com as médias aritméticas
+  struct returnData *retVal; 
+  int mediaLinhas[linhas];
+  for(int i = 0; i < metadeThreads; i++) {
+    pthread_join(threads[i], (void**)&retVal);
+    for(int j = 0; j < retVal->quantidade; j++) {
+      mediaLinhas[retVal->inicio+j] = retVal->resultado[j];
+
+      printf("%d\n", retVal->resultado[j]);
+    }
+  }
+
+  // se só tiver uma thread, inverte o tamanho e workload
   if(quantidadeThreads == 1) {
     comecoGeometrica = 0;
     dados[0].workload = colunas;
@@ -110,24 +121,14 @@ int main(int argc, char* argv[]) {
   // threads de MG
   for(int i = comecoGeometrica; i < quantidadeThreads; i++) pthread_create(&threads[i], NULL, mediaGeometrica, &dados[i]);
   
-  // recupereando os valores vindo das threads
-  // cria o vetor com as médias aritméticas
-  struct returnData *retVal; 
-  int mediaLinhas[linhas];
-  for(int i = 0; i < metadeThreads; i++) {
-    pthread_join(threads[i], (void**)&retVal);
-    printf("aaaa\n");
-    for(int j = 0; j < retVal->quantidade; j++) {
-      mediaLinhas[retVal->inicio+j] = retVal->resultado[j];
-    }
-  }
 
   // cria o vetor com as médias das colunas
   int mediaColunas[colunas];
   for(int i = comecoGeometrica; i < quantidadeThreads; i++) {
-    struct returnData *retVal;
+    printf("%d\n", i);
     pthread_join(threads[i], (void**)&retVal);
     for(int j = 0; j < retVal->quantidade; j++) {
+      printf("%d\n", retVal->resultado[j]);
       mediaColunas[retVal->inicio+j] = retVal->resultado[j];
     }
   }
@@ -150,23 +151,17 @@ void *mediaAritmetica(void* params) {
   struct dataChunk* dados = params;
 
   int *results = malloc(sizeof(int) * dados->workload);
-  printf("workload: %d\n", dados->workload);
-  printf("tamanho: %d\n", dados->tamanho);
   for(int i = 0; i < dados->workload; i++) {
     int sum = 0;
     for(int j = 0; j < dados->tamanho; j++) sum += dados->matriz[dados->inicio+i][j];
     results[i] = sum/dados->tamanho;
   }
-  printf("%d\n", results[0]);
 
   struct returnData *retVal = malloc(sizeof(struct returnData));
   retVal->inicio = dados->inicio;
   retVal->quantidade = dados->workload;
   retVal->resultado = results;
-  printf("%d\n", retVal->resultado[0]);
 
-  printf("%d %d %d", retVal->inicio, retVal->quantidade, retVal->resultado[0]);
-  
   pthread_exit((void*)retVal);
 }
 
