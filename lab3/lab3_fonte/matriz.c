@@ -9,7 +9,8 @@
 
 
 #include <stdio.h> 
-#include <stdlib.h>     //rand()
+#include <stdlib.h> //rand()
+#include <time.h>
 #include "matriz.h"
  
 /** cria uma matriz dinâmica row x col de inteiros */
@@ -32,6 +33,7 @@ void print_matrix(int** matrix, int row, int col) {
 
 /** gera elementos inteiros aleatorios entre [1,b] para uma matriz row x col*/
 void generate_elements(int** matrix, int row, int col, int limit) {
+  srand(time(NULL));
    for (int i = 0; i <  row; i++) 
       for (int j = 0; j < col; j++)
          matrix[i][j] = rand()%limit + 1;
@@ -55,3 +57,23 @@ int** read_matrix_from_file(char* filename, int *row, int *col) {
    *row = r; *col = c;
    return m;
 }
+
+// gera uma arquivo de texto com as informações de uma matriz
+void write_matrix_as_file(int** matrix, int r, int c) {
+  char filename[64]; snprintf(filename, sizeof(filename), "matriz_%dpor%d.in", r, c);
+
+  FILE *fp = fopen(filename, "w");
+
+  fprintf(fp, "%dx%d\n", r, c);
+
+  for (int i = 0; i < r; i++) {
+    for (int j = 0; j < c; j++) {
+      if (j > 0) fprintf(fp, " ");
+      fprintf(fp, "%d", matrix[i][j]);
+    }
+    fprintf(fp, "\n");
+  }
+  fclose(fp);
+}
+
+

@@ -3,7 +3,7 @@
  * Descrição: usa paralelismo de dados e funções para calcular a média aritmetica das linhas
  * e a média geométrica das colunas
  * Data de criação: 09/04/2026        
- * Data de modificação: 12/04/2026    
+ * Data de modificação: 13/04/2026    
 */                                    
 
 
@@ -15,7 +15,7 @@
 
 void *mediaAritmetica(void* params);
 void *mediaGeometrica(void* params);
-//void criarArquivoTexto(int matriz[][]);
+void salvarResultados(int linhas, int colunas);
 
 // struct para a thread, marca a linha/coluna que começa,
 // a quantidade de linhas/colunas que vai passar e o tamanho dela
@@ -45,7 +45,32 @@ int main(int argc, char* argv[]) {
   // cria uma matriz lendo um arquivo
   int linhas = 6;
   int colunas = 8; 
-  int **matriz = read_matrix_from_file("matriz_6por8.in", &linhas, &colunas);
+
+  if(argc == 3) {
+    int value = atoi(argv[2]);
+    if(value < 2) {
+      printf("tamaho da matriz não pode ser menor que 2x2");
+      exit(1);
+    }
+    linhas = value;
+    colunas = value;
+  }
+  if(argc == 4) {
+    linhas = atoi(argv[2]);
+    colunas = atoi(argv[3]);
+    if(linhas < 2 || colunas < 2) {
+      printf("tamaho da matriz não pode ser menor que 2x2");
+      exit(1);
+    }
+  }
+
+  // gera a matriz, cria o arquivo dela consome o arquivo
+  int **matriz = create_matrix(linhas, colunas);
+  generate_elements(matriz, linhas, colunas, linhas);
+  write_matrix_as_file(matriz, linhas, colunas);
+  char filename[64];
+  snprintf(filename, sizeof(filename), "matriz_%dpor%d.in", linhas, colunas);
+  matriz = read_matrix_from_file(filename, &linhas, &colunas);
 
   // define o tamanho dos vetores de retorno do resultado
   resultadoLinhas = malloc(sizeof(int) * linhas);
@@ -113,9 +138,12 @@ int main(int argc, char* argv[]) {
   for(int i = comecoGeometrica; i < quantidadeThreads; i++) pthread_create(&threads[i], NULL, mediaGeometrica, &dados[i]);
   
   for(int i = 0; i < quantidadeThreads; i++) pthread_join(threads[i], NULL);
-  
+ 
+  salvarResultados(linhas, colunas);
+
   free(resultadoColunas);
   free(resultadoLinhas);
+  free(matriz);
 
   exit(0);
 }
@@ -123,7 +151,6 @@ int main(int argc, char* argv[]) {
 void *mediaAritmetica(void* params) {
   struct dataChunk* dados = params;
 
-  
   for(int i = 0; i < dados->workload; i++) {
     int sum = 0;
     for(int j = 0; j < dados->tamanho; j++) sum += dados->matriz[dados->inicio+i][j];
@@ -137,7 +164,8 @@ void *mediaGeometrica(void* params) {
   struct dataChunk* dados = params;
 
   for(int i = 0; i < dados->workload; i++) {
-    int produto = 1;
+    unsigned long long produto = 1;
+    
     for(int j = 0; j < dados->tamanho; j++) produto *= dados->matriz[j][dados->inicio+i];
     resultadoColunas[dados->inicio+i] = pow(produto, 1.0/dados->tamanho);
   }
@@ -145,3 +173,22 @@ void *mediaGeometrica(void* params) {
   pthread_exit(NULL);
 }
 
+// função de ecrever os resultados em um arquivo de texto
+void salvarResultados(int linhas, int colunas) {
+  char* nome = "resultado.txt";
+  FILE *fp = fopen(nome, "w");
+  if (!fp) {
+    perror("erro ao abrir arquivo\n");
+    return;
+  }
+ 
+  fprintf(fp, "resultado linhas:");
+  for (int i = 0; i < linhas; i++) fprintf(fp, " %d", resultadoLinhas[i]);
+  fprintf(fp, "\n");
+ 
+  fprintf(fp, "resultado colunas:");
+  for (int i = 0; i < colunas; i++) fprintf(fp, " %d", resultadoColunas[i]);
+  fprintf(fp, "\n");
+ 
+  fclose(fp);
+}

@@ -18,4 +18,4 @@ $(EX1): $(EX1).o $(M).o
 	$(CC) -c -o $@ $< -I.
 
 clean:
-	rm -rf *.out *.o
+	rm -rf *.out *.o *.in *.txt
