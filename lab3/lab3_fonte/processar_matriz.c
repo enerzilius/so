@@ -24,11 +24,9 @@ struct dataChunk {
   int** matriz;
 };
 
-// dados retornados das threads
-struct returnData {
-  int inicio, quantidade;
-  int* resultado;
-};
+// vetores que armazenam os resultados das médias
+int* resultadoLinhas;
+int* resultadoColunas;
 
 int main(int argc, char* argv[]) {
   if(argc < 2) {
@@ -48,6 +46,10 @@ int main(int argc, char* argv[]) {
   int linhas = 6;
   int colunas = 8; 
   int **matriz = read_matrix_from_file("matriz_6por8.in", &linhas, &colunas);
+
+  // define o tamanho dos vetores de retorno do resultado
+  resultadoLinhas = malloc(sizeof(int) * linhas);
+  resultadoColunas = malloc(sizeof(int) * colunas);
 
   // divisão do trabalho, metade das threads faz a media aritmetica e a outra faz a geométrica
   // define o ínicio (linha/coluna) da thread e quantas ela vai percorrer
@@ -93,27 +95,16 @@ int main(int argc, char* argv[]) {
 
   // cria as threads, ajustando caso só crie uma
   pthread_t threads[quantidadeThreads];
-
   // threads de MA
   for(int i = 0; i < metadeThreads; i++) pthread_create(&threads[i], NULL, mediaAritmetica, &dados[i]);
   int comecoGeometrica = metadeThreads;
   
-  // recupereando os valores vindo das threads
-  // cria o vetor com as médias aritméticas
-  struct returnData *retVal; 
-  int mediaLinhas[linhas];
-  for(int i = 0; i < metadeThreads; i++) {
-    pthread_join(threads[i], (void**)&retVal);
-    for(int j = 0; j < retVal->quantidade; j++) {
-      mediaLinhas[retVal->inicio+j] = retVal->resultado[j];
-
-      printf("%d\n", retVal->resultado[j]);
-    }
-  }
-
   // se só tiver uma thread, inverte o tamanho e workload
   if(quantidadeThreads == 1) {
     comecoGeometrica = 0;
+    for(int i = 0; i < metadeThreads; i++) {
+      pthread_join(threads[i], NULL);
+    }
     dados[0].workload = colunas;
     dados[0].tamanho = linhas;
   }
@@ -121,28 +112,10 @@ int main(int argc, char* argv[]) {
   // threads de MG
   for(int i = comecoGeometrica; i < quantidadeThreads; i++) pthread_create(&threads[i], NULL, mediaGeometrica, &dados[i]);
   
-
-  // cria o vetor com as médias das colunas
-  int mediaColunas[colunas];
-  for(int i = comecoGeometrica; i < quantidadeThreads; i++) {
-    printf("%d\n", i);
-    pthread_join(threads[i], (void**)&retVal);
-    for(int j = 0; j < retVal->quantidade; j++) {
-      printf("%d\n", retVal->resultado[j]);
-      mediaColunas[retVal->inicio+j] = retVal->resultado[j];
-    }
-  }
-  free(retVal->resultado);
-  free(retVal);
-
-  printf("aritmetica: ");
-  for(int i = 0; i < linhas; i++) printf("%d, ", mediaLinhas[i]);
-  printf("\n");
-  printf("geometrica: ");
-  for(int i = 0; i < colunas; i++) printf("%d, ", mediaColunas[i]);
-  printf("\n");
-
-  pthread_exit(NULL);
+  for(int i = 0; i < quantidadeThreads; i++) pthread_join(threads[i], NULL);
+  
+  free(resultadoColunas);
+  free(resultadoLinhas);
 
   exit(0);
 }
@@ -150,36 +123,25 @@ int main(int argc, char* argv[]) {
 void *mediaAritmetica(void* params) {
   struct dataChunk* dados = params;
 
-  int *results = malloc(sizeof(int) * dados->workload);
+  
   for(int i = 0; i < dados->workload; i++) {
     int sum = 0;
     for(int j = 0; j < dados->tamanho; j++) sum += dados->matriz[dados->inicio+i][j];
-    results[i] = sum/dados->tamanho;
+    resultadoLinhas[dados->inicio+i] = sum/dados->tamanho;
   }
 
-  struct returnData *retVal = malloc(sizeof(struct returnData));
-  retVal->inicio = dados->inicio;
-  retVal->quantidade = dados->workload;
-  retVal->resultado = results;
-
-  pthread_exit((void*)retVal);
+  pthread_exit(NULL);
 }
 
 void *mediaGeometrica(void* params) {
   struct dataChunk* dados = params;
 
-  int *results = malloc(sizeof(int) * dados->workload);
   for(int i = 0; i < dados->workload; i++) {
     int produto = 1;
-    for(int j = 0; j < dados->tamanho; j++) produto *= dados->matriz[dados->inicio+i][j];
-    results[i] = pow(produto, 1.0/dados->tamanho);
+    for(int j = 0; j < dados->tamanho; j++) produto *= dados->matriz[j][dados->inicio+i];
+    resultadoColunas[dados->inicio+i] = pow(produto, 1.0/dados->tamanho);
   }
 
-  struct returnData *retVal = malloc(sizeof(struct returnData));
-  retVal->inicio = dados->inicio;
-  retVal->quantidade = dados->workload;
-  retVal->resultado = results;
-
-  pthread_exit((void*)retVal);
+  pthread_exit(NULL);
 }
 
