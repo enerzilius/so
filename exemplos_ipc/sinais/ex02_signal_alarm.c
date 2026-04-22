@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 /* Flag que controla a terminação do loop. */
+// volatile: sempre fica na memória
 volatile sig_atomic_t keep_going = 1;
 
 /* Tratador para o sinal SIGALRM. Reseta o flag e se reabilita. */
