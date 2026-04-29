@@ -8,7 +8,9 @@
 
 /*
  * Autor: Eber Felipe Barrotti Louback
- * Descrição: Busca um número em um vetor de inteiros usando n threads
+ * Descrição:  lê strings digitadas pelo usuário e envia para outro programa que
+recebe essas strings e exibe na tela: a string, o tamanho, o número de
+consoantes, o número de vogais e o número de espaços usando pipe
  * Data de criação: 28/04/2026
  * Data de modificação: 29/04/2026
  */
@@ -33,7 +35,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  // processo pai, lê string do usuário e usa a pipe para
+  // processo pai, lê string do usuário e usa a pipe para enviar
   if (pid != 0) {
     close(myPipe[0]);
     printf("Digite algo para enviar: ");

@@ -12,3 +12,6 @@ $(EX1A): $(EX1A_FIFO) $(EX1A_PIPE)
 
 $($EX1A_PIPE): $(EX1A_PIPE).c
 	$(CC) $(EX1A_PIPE).c -o $(EX1A_PIPE).out
+
+$($EX1A_FIFO): $(EX1A_FIFO).c
+	$(CC) $(EX1A_FIFO).c -o $(EX1A_FIFO).out
