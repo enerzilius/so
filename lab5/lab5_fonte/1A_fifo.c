@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     wait(NULL);
     return EXIT_SUCCESS;
   } else {
-    // processo filho, lê os dados salvos pelo pai na pipe, processa e imprime
+    // processo filho, lê os dados salvos pelo outro processo na pipe, processa e imprime
 
     // abre o FIFO para escrita
     if ((fd_server = open(SERVER_FIFO, O_RDONLY)) == -1) {
