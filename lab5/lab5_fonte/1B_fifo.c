@@ -11,16 +11,15 @@
 
 /*
  * Autor: Eber Felipe Barrotti Louback
- * Descrição:  lê strings digitadas pelo usuário e envia para outro programa que
-recebe essas strings e exibe na tela: a string, o tamanho, o número de
-consoantes, o número de vogais e o número de espaços usando fifo
- * Data de criação: 28/04/2026
+ * Descrição:  programa que lê uma expressão matemática simples (+, -, *, /) e passe para outro
+programa que realiza o cálculo e devolve a resposta - usando fifo
+ * Data de criação: 29/04/2026
  * Data de modificação: 29/04/2026
  */
 
 #define SERVER_FIFO "/tmp/serverfifo"
 
-void analisarString(char *str, int *nVogais, int *nConsoantes, int *nEspacos);
+int calcular(int num1, int num2, char op);
 
 int main(int argc, char *argv[]) {
   char str[51];
@@ -47,7 +46,7 @@ int main(int argc, char *argv[]) {
       perror("open");
     }
 
-    printf("Digite algo para enviar: ");
+    printf("Digite um cálculo simples (+, -, *, /) escrito como a + b : ");
     scanf("%50[^\n]", str);
 
     write(fd_server, str, strlen(str));
@@ -60,7 +59,7 @@ int main(int argc, char *argv[]) {
     wait(NULL);
     return EXIT_SUCCESS;
   } else {
-    // processo filho, lê os dados salvos pelo outro processo, processa e imprime
+    // processo filho, lê os dados salvos pelo outro processo, calcula e imprime
 
     // abre o FIFO para escrita
     if ((fd_server = open(SERVER_FIFO, O_RDONLY)) == -1) {
@@ -83,40 +82,47 @@ int main(int argc, char *argv[]) {
       printf("Recebeu %d bytes: %s\n", numBytesRead, str);
     }
 
-    int numeroConsoantes = 0;
-    int numeroVogais = 0;
-    int numeroEspacos = 0;
+    // processa o que foi passado pela pipe:
+    // divide em um vetor e traduz para números e oparador em char
+    char* arguments[4];
+    char* temp = str;
 
-    analisarString(str, &numeroVogais, &numeroConsoantes, &numeroEspacos);
+    for (int i = 0; i < 3 && (arguments[i] = strsep(&temp, " ")) != NULL; ++i); 
+    free(temp);
+    arguments[3] = (char*)0;
 
-    printf("String enviada: %s\n", str);
-    printf("Tamanho da string: %ld\n", strlen(str));
-    printf("Numero de vogais: %d\n", numeroVogais);
-    printf("Numero de consoantes: %d\n", numeroConsoantes);
-    printf("Numero de espaços: %d\n", numeroEspacos);
+    int num1 = atoi(arguments[0]);
+    char operador = arguments[1][0];
+    int num2 = atoi(arguments[2]);
+
+    // verifica se a operação é válida
+    if(operador != '+' && operador != '-' && operador != '*' && operador != '/') {
+        printf("operação não permitida.");
+        return EXIT_FAILURE;
+    }
+
+    int resultado = calcular(num1, num2, operador);
+
+    printf("%d %c %d = %d\n", num1, operador, num2, resultado);
+    
     fflush(stdout);
     return EXIT_SUCCESS;
   }
 }
 
-// faz a contagem das vogais e consoantes da string
-void analisarString(char *str, int *nVogais, int *nConsoantes, int *nEspacos) {
-  char c = str[0];
-  int i = 0;
-  while (c != 0) {
-    char lower = tolower(c);
-
-    if (c == ' ')
-      (*nEspacos)++;
-    if (lower >= 'a' && lower <= 'z') {
-      if (lower == 'a' || lower == 'e' || lower == 'i' || lower == 'o' ||
-          lower == 'u') {
-        (*nVogais)++;
-      } else {
-        (*nConsoantes)++;
-      }
+// realiza o cálculo simples usando um switch para saber qual fazer
+int calcular(int num1, int num2, char op) {
+    switch (op)
+    {
+        case '+':
+            return num1 + num2;
+        case '-':
+            return num1-num2;
+        case '*':
+            return num1*num2;
+        case '/':
+            return num1/num2;
+        default:
+            return 0;
     }
-
-    c = str[++i];
-  }
 }

@@ -38,7 +38,7 @@ programa que realiza o cálculo e devolve a resposta - usando pipe
   // processo pai, lê a operação escrita pelo usuário
   if (pid != 0) {
     close(myPipe[0]);
-    printf("Digite um cálculo simples (+, -, *, /) escrito como (a + b) : ");
+    printf("Digite um cálculo simples (+, -, *, /) escrito como a + b : ");
     scanf("%50[^\n]", str);
     write(myPipe[1], str, sizeof(str));
 
@@ -81,18 +81,18 @@ programa que realiza o cálculo e devolve a resposta - usando pipe
   return EXIT_SUCCESS;
  }
 
-  int calcular(int num1, int num2, char op) {
+int calcular(int num1, int num2, char op) {
     switch (op)
     {
-    case '+':
-        return num1 + num2;
-    case '-':
-        return num1-num2;
-    case '*':
-        return num1*num2;
-    case '/':
-        return num1/num2;
-    default:
-        return -1;
+        case '+':
+            return num1 + num2;
+        case '-':
+            return num1-num2;
+        case '*':
+            return num1*num2;
+        case '/':
+            return num1/num2;
+        default:
+            return -1;
     }
-  }
+}
