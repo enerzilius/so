@@ -10,7 +10,8 @@
 /*
  * Autor: Eber Felipe Barrotti Louback
  * Descrição:Lê atributos de um arquivo, ao receber o sinal sighup, refaz esse
- * processo Data de criação: 29/04/2026
+ * processo
+ * Data de criação: 29/04/2026
  * Data de modificação: 01/04/2026
  */
 
