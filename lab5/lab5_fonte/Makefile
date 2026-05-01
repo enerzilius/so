@@ -5,8 +5,10 @@ EX1A_FIFO=1A_fifo
 EX1B_PIPE=1B_pipe
 EX1B_FIFO=1B_fifo
 EX2A=2A
+EX2B=2B
+EX2C=2C
 
-PROGS=$(EX1A_PIPE) $(EX1A_FIFO) $(EX1B_PIPE) $(EX1B_FIFO) $(EX2A)
+PROGS=$(EX1A_PIPE) $(EX1A_FIFO) $(EX1B_PIPE) $(EX1B_FIFO) $(EX2A) $(EX2B) $(EX2C)
 
 all: $(PROGS)
 
@@ -24,6 +26,12 @@ $($EX1B_FIFO): $(EX1B_FIFO).c
 
 $($EX2A): $(EX2A).c
 	$(CC) $(EX2A).c -o $(EX2A).out
+
+$($EX2B): $(EX2B).c
+	$(CC) $(EX2B).c -o $(EX2B).out
+
+$($EX2C): $(EX2C).c
+	$(CC) $(EX2C).c -o $(EX2C).out
 
 clean:
 	rm $(PROGS)
