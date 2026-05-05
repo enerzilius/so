@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 /*
  * Autor: Eber Felipe Barrotti Louback
