@@ -8,8 +8,9 @@ EX2A=2A
 EX2B=2B
 EX2C=2C
 EX3=3
+EX4=4
 
-PROGS=$(EX1A_PIPE) $(EX1A_FIFO) $(EX1B_PIPE) $(EX1B_FIFO) $(EX2A) $(EX2B) $(EX2C) $(EX3)
+PROGS=$(EX1A_PIPE) $(EX1A_FIFO) $(EX1B_PIPE) $(EX1B_FIFO) $(EX2A) $(EX2B) $(EX2C) $(EX3) $(EX4)
 
 all: $(PROGS)
 
@@ -37,5 +38,8 @@ $($EX2C): $(EX2C).c
 $(EX3): $(EX3).c
 	$(CC) $(EX3).c -o $(EX3).out
 
+$(EX4): $(EX4).c
+	$(CC) $(EX4).c -o $(EX4).out
+
 clean:
-	rm $(PROGS)
+	rm $(PROGS) *.out
