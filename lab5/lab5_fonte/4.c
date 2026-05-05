@@ -8,6 +8,13 @@
 #include <time.h>
 #include <unistd.h>
 
+/*
+ * Autor: Eber Felipe Barrotti Louback
+ * Descrição:Lê atributos de um arquivo, ao receber o sinal sighup, refaz esse
+ * processo Data de criação: 04/04/2026
+ * Data de modificação: 04/04/2026
+ */
+
 #define NAME "vetor"
 
 void gerarRandomVec(int **vec, int n);
@@ -57,7 +64,7 @@ int main(int argc, char *argv[]) {
   ftruncate(shm_fd, sizeof(int) * numeroElementos * 3);
 
   // mapeia o ponteiro com o tamanho do vetor na memória compartilhada
-  void *ptr = mmap(NULL, sizeof(vec) * 3, PROT_READ | PROT_WRITE, MAP_SHARED,
+  void *ptr = mmap(NULL, sizeof(vec) * 3, O_RDWR, MAP_SHARED,
                    shm_fd, 0);
   if (ptr == MAP_FAILED) {
     printf("Map failed\n");
@@ -122,7 +129,7 @@ int main(int argc, char *argv[]) {
 
       // mapeia segmento no espaco de enderecamento do processo
       void *memoriaCompartilhada = mmap(NULL, sizeof(int) * numeroElementos * 3,
-                                        PROT_READ, MAP_SHARED, shm_fd, 0);
+                                        O_RDWR, MAP_SHARED, shm_fd, 0);
 
       if (memoriaCompartilhada == MAP_FAILED) {
         perror("Falha no mapeamento (consumer)\n");
@@ -135,26 +142,28 @@ int main(int argc, char *argv[]) {
         dadosLidos->vecSoma[i * trabalho + j] =
             dadosLidos->vec1[i * trabalho + j] +
             dadosLidos->vec2[i * trabalho + j];
+        printf("%d: %d\n",i, dadosLidos->vecSoma[i*trabalho+j]);
+        fflush(stdout);
       }
-      printf("%d\n", dadosLidos->vecSoma[i]);
-      fflush(stdout);
-
-      // remove segmento de memoria compartilhada
-      if (shm_unlink(NAME) == -1) {
-        perror("Erro no unlink ");
-        exit(EXIT_FAILURE);
-      }
-
+      
       exit(EXIT_SUCCESS);
     }
   }
 
-  wait(NULL);
+  for(int i = 0; i < numeroFilhos; ++i) wait(NULL);
+
+  struct Dados *dadosRecupeados = ptr;
 
   for (int i = 0; i < numeroElementos; ++i) {
-    printf("%d ", vecSoma[i]);
+    printf("%d ", dadosRecupeados->vecSoma[i]);
   }
   printf("\n");
+
+  // remove segmento de memoria compartilhada
+  if (shm_unlink(NAME) == -1) {
+    perror("Erro no unlink ");
+    exit(EXIT_FAILURE);
+  }
 
   return EXIT_SUCCESS;
 }

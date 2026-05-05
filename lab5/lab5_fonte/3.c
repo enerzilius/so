@@ -8,6 +8,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+/*
+ * Autor: Eber Felipe Barrotti Louback
+ * Descrição:Lê atributos de um arquivo, ao receber o sinal sighup, refaz esse
+ * processo Data de criação: 02/04/2026
+ * Data de modificação: 03/04/2026
+ */
+
+
 struct Livro {
   char titulo[40];
   char autor[30];
