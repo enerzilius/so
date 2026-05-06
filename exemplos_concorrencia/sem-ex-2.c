@@ -94,11 +94,19 @@ void *run(void *ptr){
   int tid = *((int*) ptr);
   printf("Thread %d working...\n", tid);
   
-  while (posicao < N){
+  
+  while (1){
 	  printf("Thread %d: Aguardando para entrar na região crítica.\n", tid);
-      sem_wait(&mutex);  // obter o semaforo.
       
-	  /* Seção Crítica - Inicio */
+      sem_wait(&mutex);  // obter o semaforo.
+
+     /* Seção Crítica - Inicio */
+      
+     if(posicao >= N) {
+        sem_post(&mutex); // libera o semaforo
+        break;
+     }
+	  
 	  printf("Thread %d: Na região crítica.\n", tid);
 	  printf("Thread %d: Posicao atual de alteracao do vetor: %d\n", tid, posicao);
 	  
@@ -106,12 +114,14 @@ void *run(void *ptr){
 	  c[posicao] = a[posicao] + b[posicao];
 
       printf("Thread %d: Incrementando a posicao %d.\n", tid, posicao);
-	  posicao++;
+	  if(posicao < N) posicao++;
 	  
       printf("Thread %d: Saindo da região crítica...\n", tid);
-	  /* Seção Crítica - Fim */    
-	   sem_post(&mutex); // libera o semaforo
+	  /* Seção Crítica - Fim */  
+      sem_post(&mutex); // libera o semaforo  
   }
+  
+   
   
   pthread_exit(0);
 }
