@@ -12,7 +12,7 @@
  * Autor: Eber Felipe Barrotti Louback
  * Descrição:Lê atributos de um arquivo, ao receber o sinal sighup, refaz esse
  * processo Data de criação: 04/04/2026
- * Data de modificação: 04/04/2026
+ * Data de modificação: 06/04/2026
  */
 
 #define NAME "vetor"
@@ -27,6 +27,7 @@ struct Dados {
 };
 
 int main(int argc, char *argv[]) {
+  srand(time(NULL));
   if (argc < 3) {
     printf("Determine o número de elementos e o número de filhos\n");
     return EXIT_FAILURE;
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
   ftruncate(shm_fd, sizeof(int) * numeroElementos * 3);
 
   // mapeia o ponteiro com o tamanho do vetor na memória compartilhada
-  void *ptr = mmap(NULL, sizeof(vec) * 3, O_RDWR, MAP_SHARED,
+  void *ptr = mmap(NULL, sizeof(vec) * 3, PROT_READ | PROT_WRITE, MAP_SHARED,
                    shm_fd, 0);
   if (ptr == MAP_FAILED) {
     printf("Map failed\n");
@@ -84,7 +85,6 @@ int main(int argc, char *argv[]) {
   int pipes[numeroFilhos][2];
 
   for (int i = 0; i < numeroFilhos; ++i) {
-    printf("i: %d\n", i);
     if (i >= numeroElementos)
       continue;
     if (i == numeroFilhos - 1)
@@ -107,6 +107,7 @@ int main(int argc, char *argv[]) {
       exit(EXIT_FAILURE);
     }
 
+    // pai escreve o número de elementos que o filho vai ler
     if (pid > 0) {
       close(pipes[i][0]);
       write(pipes[i][1], stringNumero, sizeof(stringNumero));
@@ -128,8 +129,9 @@ int main(int argc, char *argv[]) {
       }
 
       // mapeia segmento no espaco de enderecamento do processo
-      void *memoriaCompartilhada = mmap(NULL, sizeof(int) * numeroElementos * 3,
-                                        O_RDWR, MAP_SHARED, shm_fd, 0);
+      void *memoriaCompartilhada =
+          mmap(NULL, sizeof(int) * numeroElementos * 3, PROT_READ | PROT_WRITE,
+               MAP_SHARED, shm_fd, 0);
 
       if (memoriaCompartilhada == MAP_FAILED) {
         perror("Falha no mapeamento (consumer)\n");
@@ -142,20 +144,22 @@ int main(int argc, char *argv[]) {
         dadosLidos->vecSoma[i * trabalho + j] =
             dadosLidos->vec1[i * trabalho + j] +
             dadosLidos->vec2[i * trabalho + j];
-        printf("%d: %d\n",i, dadosLidos->vecSoma[i*trabalho+j]);
+        printf("%d: %d\n", i, dadosLidos->vecSoma[i * trabalho + j]);
         fflush(stdout);
       }
-      
+
       exit(EXIT_SUCCESS);
     }
   }
 
-  for(int i = 0; i < numeroFilhos; ++i) wait(NULL);
+  for (int i = 0; i < numeroFilhos; ++i)
+    wait(NULL);
 
-  struct Dados *dadosRecupeados = ptr;
+  // Após o wait() de todos os filhos
+  struct Dados *shm = (struct Dados *)ptr;
 
   for (int i = 0; i < numeroElementos; ++i) {
-    printf("%d ", dadosRecupeados->vecSoma[i]);
+    printf("%d ", shm->vecSoma[i]); // lê da memória compartilhada
   }
   printf("\n");
 
@@ -172,7 +176,6 @@ int main(int argc, char *argv[]) {
 // e prenche o vetor com números aleatórios
 void gerarRandomVec(int **vec, int n) {
   *vec = malloc(n * sizeof(int));
-  srand(time(NULL));
 
   for (int i = 0; i < n; ++i)
     (*vec)[i] = rand() % n;
