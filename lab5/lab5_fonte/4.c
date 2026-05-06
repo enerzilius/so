@@ -1,13 +1,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-
 /*
  * Autor: Eber Felipe Barrotti Louback
  * Descrição:Lê atributos de um arquivo, ao receber o sinal sighup, refaz esse
@@ -50,8 +50,6 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  printf("nfilhos: %d; nelems: %d\n", numeroFilhos, numeroElementos);
-
   // gerando vetor
   gerarRandomVec(&vec, numeroElementos);
   gerarRandomVec(&vec2, numeroElementos);
@@ -65,16 +63,20 @@ int main(int argc, char *argv[]) {
   ftruncate(shm_fd, sizeof(int) * numeroElementos * 3);
 
   // mapeia o ponteiro com o tamanho do vetor na memória compartilhada
-  void *ptr = mmap(NULL, sizeof(vec) * 3, PROT_READ | PROT_WRITE, MAP_SHARED,
-                   shm_fd, 0);
+  void *ptr = mmap(NULL, sizeof(int) * numeroElementos * 3,
+                   PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
   if (ptr == MAP_FAILED) {
     printf("Map failed\n");
     return EXIT_FAILURE;
   }
 
-  // copia os dados dos vetores para o ponteiro de memória compartilhada
-  struct Dados dados = {vec, vec2, vecSoma};
-  *(struct Dados *)ptr = dados;
+  // colocando os vetores na memória compartilhada
+  int *shmVec1 = (int *)ptr;
+  int *shmVec2 = shmVec1 + numeroElementos;
+  int *shmVecSoma = shmVec2 + numeroElementos;
+  memcpy(shmVec1, vec, sizeof(int) * numeroElementos);
+  memcpy(shmVec2, vec2, sizeof(int) * numeroElementos);
+  memcpy(shmVecSoma, vecSoma, sizeof(int) * numeroElementos);
 
   // dividindo o trabalho
   int workload = numeroElementos / numeroFilhos;
@@ -122,44 +124,43 @@ int main(int argc, char *argv[]) {
       int trabalho = atoi(lido);
 
       // abre segmento de memoria compartilhada cmo leitura
-      shm_fd = shm_open(NAME, O_RDWR, 0666);
-      if (shm_fd == -1) {
+      int shm_fd_child = shm_open(NAME, O_RDWR, 0666);
+      if (shm_fd_child == -1) {
         perror("falha na abertura da memória compartilhada");
         exit(EXIT_FAILURE);
       }
 
       // mapeia segmento no espaco de enderecamento do processo
-      void *memoriaCompartilhada =
+      void *dadosLidos =
           mmap(NULL, sizeof(int) * numeroElementos * 3, PROT_READ | PROT_WRITE,
-               MAP_SHARED, shm_fd, 0);
+               MAP_SHARED, shm_fd_child, 0);
 
-      if (memoriaCompartilhada == MAP_FAILED) {
+      if (dadosLidos == MAP_FAILED) {
         perror("Falha no mapeamento (consumer)\n");
         exit(EXIT_FAILURE);
       }
 
-      struct Dados *dadosLidos = memoriaCompartilhada;
+      // dividindo os vetores lidos
+      int *vetorLido1 = (int *)dadosLidos;
+      int *vetorLido2 = vetorLido1 + numeroElementos;
+      int *vetorSoma = vetorLido2 + numeroElementos;
 
       for (int j = 0; j < trabalho; ++j) {
-        dadosLidos->vecSoma[i * trabalho + j] =
-            dadosLidos->vec1[i * trabalho + j] +
-            dadosLidos->vec2[i * trabalho + j];
-        printf("%d: %d\n", i, dadosLidos->vecSoma[i * trabalho + j]);
-        fflush(stdout);
+        int index = i * trabalho + j;
+        vetorSoma[index] = vetorLido1[index] + vetorLido2[index];
       }
 
       exit(EXIT_SUCCESS);
     }
   }
 
+  // espera todos os filhos terminarem
   for (int i = 0; i < numeroFilhos; ++i)
     wait(NULL);
 
-  // Após o wait() de todos os filhos
-  struct Dados *shm = (struct Dados *)ptr;
-
+  // lê os resultados
   for (int i = 0; i < numeroElementos; ++i) {
-    printf("%d ", shm->vecSoma[i]); // lê da memória compartilhada
+    printf("%d ", shmVecSoma[i]); // lê da memória compartilhada
   }
   printf("\n");
 
