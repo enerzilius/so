@@ -12,6 +12,7 @@
 sem_t servindo;
 sem_t caldeirao_vazio;
 sem_t caldeirao_tem_coisa;
+int porcoes = 0;
 
 void *cozinheiro();
 void *selvagem();
