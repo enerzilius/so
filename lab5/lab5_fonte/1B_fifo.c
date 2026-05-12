@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -11,8 +10,9 @@
 
 /*
  * Autor: Eber Felipe Barrotti Louback
- * Descrição:  programa que lê uma expressão matemática simples (+, -, *, /) e passe para outro
-programa que realiza o cálculo e devolve a resposta - usando fifo
+ * Descrição:  programa que lê uma expressão matemática simples (+, -, *, /) e
+passe para outro programa que realiza o cálculo e devolve a resposta - usando
+fifo
  * Data de criação: 29/04/2026
  * Data de modificação: 29/04/2026
  */
@@ -84,27 +84,29 @@ int main(int argc, char *argv[]) {
 
     // processa o que foi passado pela pipe:
     // divide em um vetor e traduz para números e oparador em char
-    char* arguments[4];
-    char* temp = str;
+    char *arguments[4];
+    char *temp = str;
 
-    for (int i = 0; i < 3 && (arguments[i] = strsep(&temp, " ")) != NULL; ++i); 
+    for (int i = 0; i < 3 && (arguments[i] = strsep(&temp, " ")) != NULL; ++i)
+      ;
     free(temp);
-    arguments[3] = (char*)0;
+    arguments[3] = (char *)0;
 
     int num1 = atoi(arguments[0]);
     char operador = arguments[1][0];
     int num2 = atoi(arguments[2]);
 
     // verifica se a operação é válida
-    if(operador != '+' && operador != '-' && operador != '*' && operador != '/') {
-        printf("operação não permitida.");
-        return EXIT_FAILURE;
+    if (operador != '+' && operador != '-' && operador != '*' &&
+        operador != '/') {
+      printf("operação não permitida.");
+      return EXIT_FAILURE;
     }
 
     int resultado = calcular(num1, num2, operador);
 
     printf("%d %c %d = %d\n", num1, operador, num2, resultado);
-    
+
     fflush(stdout);
     return EXIT_SUCCESS;
   }
@@ -112,17 +114,16 @@ int main(int argc, char *argv[]) {
 
 // realiza o cálculo simples usando um switch para saber qual fazer
 int calcular(int num1, int num2, char op) {
-    switch (op)
-    {
-        case '+':
-            return num1 + num2;
-        case '-':
-            return num1-num2;
-        case '*':
-            return num1*num2;
-        case '/':
-            return num1/num2;
-        default:
-            return 0;
-    }
+  switch (op) {
+  case '+':
+    return num1 + num2;
+  case '-':
+    return num1 - num2;
+  case '*':
+    return num1 * num2;
+  case '/':
+    return num1 / num2;
+  default:
+    return 0;
+  }
 }

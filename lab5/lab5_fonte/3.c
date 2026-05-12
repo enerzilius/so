@@ -15,7 +15,6 @@
  * Data de modificação: 03/04/2026
  */
 
-
 struct Livro {
   char titulo[40];
   char autor[30];
@@ -60,9 +59,6 @@ int main() {
     wait(NULL);
     return EXIT_SUCCESS;
   } else { // processo filho, consumer
-    // espera o dado ser salvo antes de acessar a memória
-    sleep(2);
-
     // abre segmento de memoria compartilhada cmo leitura
     shm_fd = shm_open(name, O_RDONLY, 0666);
     if (shm_fd == -1) {
