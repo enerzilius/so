@@ -18,17 +18,20 @@
 #define N_CLIENTES 2
 #define CADEIRAS 1
 
+// semáforos usados para resolver as concorrências
 sem_t mutex;
 sem_t esperando;
 sem_t cadeiraBarbeiro;
 int cadeirasUsadas = 0;
 
+// funções do barbeiro e clientes
 void *barbeiro();
 void *cliente();
 
 int main() {
   pthread_t threads[N_CLIENTES + 1];
 
+  // inicializando os semáforos
   sem_init(&mutex, 1, 1);
   sem_init(&esperando, 1, 0);
   sem_init(&cadeiraBarbeiro, 1, 1);
@@ -51,6 +54,9 @@ int main() {
   exit(EXIT_SUCCESS);
 }
 
+// dorme se não tiver ninguém esperando e não estiver trabalhando
+// se alguem estiver esperando, começa a cortar o cabelo e libera a cadeira do
+// barbeiro no final
 void *barbeiro() {
   while (1) {
     printf("Barbeiro: Dormindo... zzzzzz...\n");
@@ -63,6 +69,8 @@ void *barbeiro() {
   }
 }
 
+// se o lugar estver cheio, vai embora
+// se não entra na fila de espera e espera a cadeira do barbeiro ficar livre
 void *cliente() {
   sem_wait(&mutex);
   if (cadeirasUsadas >= CADEIRAS) {
